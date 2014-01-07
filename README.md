@@ -1,4 +1,4 @@
-# Redis multi-type counter plugin for fluent [![Build Status](https://secure.travis-ci.org/heartsavior/fluent-plugin-redis-multi-type-counter.png)](http://travis-ci.org/heartsavior/fluent-plugin-redis-multi-type-counter)
+# Redis multi-type counter plugin for fluent [![Build Status](https://travis-ci.org/HeartSaVioR/fluent-plugin-redis-multi-type-counter.png)](https://travis-ci.org/HeartSaVioR/fluent-plugin-redis-multi-type-counter)
 
 fluent-plugin-redis-multi-type-counter is a fluent plugin to count-up/down redis keys, hash, sorted set.
 

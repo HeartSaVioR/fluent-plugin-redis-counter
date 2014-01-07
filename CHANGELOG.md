@@ -1,3 +1,6 @@
+## 0.1.2
+* bug fix (rename files to fit plugin name)
+
 ## 0.1.0
 * support hash, sorted set type
 

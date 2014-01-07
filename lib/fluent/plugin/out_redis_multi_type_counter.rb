@@ -1,6 +1,6 @@
 module Fluent
-  class RedisCounterOutput < BufferedOutput
-    Fluent::Plugin.register_output('redis_counter', self)
+  class RedisMultiTypeCounterOutput < BufferedOutput
+    Fluent::Plugin.register_output('redis_multi_type_counter', self)
     attr_reader :host, :port, :db_number, :password, :redis, :patterns
 
     config_param :max_pipelining, :integer, :default => 1000
@@ -23,7 +23,7 @@ module Fluent
       }.each { |element|
         begin
           @patterns << Pattern.new(element)
-        rescue RedisCounterException => e
+        rescue RedisMultiTypeCounterException => e
           raise Fluent::ConfigError, e.message
         end
       }
@@ -114,7 +114,7 @@ module Fluent
       end
     end
 
-    class RedisCounterException < Exception
+    class RedisMultiTypeCounterException < Exception
     end
 
     class RecordValueFormatter
@@ -137,17 +137,17 @@ module Fluent
 
       def initialize(conf_element)
         if !conf_element.has_key?('count_key') && !conf_element.has_key?('count_key_format')
-          raise RedisCounterException, '"count_key" or "count_key_format" is required.'
+          raise RedisMultiTypeCounterException, '"count_key" or "count_key_format" is required.'
         end
         if conf_element.has_key?('count_key') && conf_element.has_key?('count_key_format')
-          raise RedisCounterException, 'both "count_key" and "count_key_format" are specified.'
+          raise RedisMultiTypeCounterException, 'both "count_key" and "count_key_format" are specified.'
         end
 
         if conf_element.has_key?('count_key')
           @count_key = conf_element['count_key']
         else
           if conf_element.has_key?('localtime') && conf_element.has_key?('utc')
-            raise RedisCounterException, 'both "localtime" and "utc" are specified.'
+            raise RedisMultiTypeCounterException, 'both "localtime" and "utc" are specified.'
           end
           is_localtime = true
           if conf_element.has_key?('utc')
@@ -158,7 +158,7 @@ module Fluent
         end
 
         if conf_element.has_key?('count_hash_key_format') && conf_element.has_key?('count_zset_key_format')
-          raise RedisCounterException, 'both "count_hash_key_format" "count_zset_key_format" are specified.'
+          raise RedisMultiTypeCounterException, 'both "count_hash_key_format" "count_zset_key_format" are specified.'
         end
 
         if conf_element.has_key?('count_hash_key_format')
@@ -183,7 +183,7 @@ module Fluent
             begin
               @count_value = Integer(conf_element['count_value'])
             rescue
-              raise RedisCounterException, 'invalid "count_value", integer required.'
+              raise RedisMultiTypeCounterException, 'invalid "count_value", integer required.'
             end
           end
         end

@@ -6,7 +6,7 @@ require 'ruby-prof'
 end
 
 $LOAD_PATH.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
-require 'fluent/plugin/out_redis_counter'
+require 'fluent/plugin/out_redis_multi_type_counter'
 
 module PerformanceTestApp
   class Benchmarker

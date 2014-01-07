@@ -7,7 +7,7 @@ rvm:
 services:
   - redis-server
 
-script: bundle exec ruby -S -Itest test/plugin/out_redis_counter.rb
+script: bundle exec ruby -S -Itest test/plugin/out_redis_multi_type_counter.rb
 
 branches:
   only:

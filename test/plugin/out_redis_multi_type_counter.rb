@@ -1,9 +1,9 @@
 require 'fluent/test'
 
-class RedisCounterTest < Test::Unit::TestCase
+class RedisMultiTypeCounterTest < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
-    require 'fluent/plugin/out_redis_counter'
+    require 'fluent/plugin/out_redis_multi_type_counter'
 
     @d = create_driver %[
       host localhost
@@ -24,7 +24,7 @@ class RedisCounterTest < Test::Unit::TestCase
   end
 
   def create_driver(conf = CONFIG)
-    Fluent::Test::BufferedOutputTestDriver.new(Fluent::RedisCounterOutput).configure(conf)
+    Fluent::Test::BufferedOutputTestDriver.new(Fluent::RedisMultiTypeCounterOutput).configure(conf)
   end
 
   def test_configure

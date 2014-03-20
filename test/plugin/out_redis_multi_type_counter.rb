@@ -20,6 +20,7 @@ class RedisMultiTypeCounterTest < Test::Unit::TestCase
     redis.del("item_sum_count:200")
     redis.del("item_sum_count_by_hash:200")
     redis.del("item_sum_count_by_zset:200")
+    redis.del("item_list_count:200")
     redis.quit
   end
 
@@ -182,6 +183,36 @@ class RedisMultiTypeCounterTest < Test::Unit::TestCase
     end
   end
 
+  def test_configure_store_list_with_specified_hash_key
+    begin
+      create_driver %[
+        <pattern>
+          count_key_format %_{prefix}-foo-bar
+		  store_list true
+          count_hash_key_format %_{host}-hash-key
+        </pattern>
+      ]
+      flunk
+    rescue Fluent::ConfigError => e
+      assert_equal 'store_list is true, it should be normal type, not hash or zset', e.message
+    end
+  end
+
+  def test_configure_store_list_with_specified_zset_key
+    begin
+      create_driver %[
+        <pattern>
+          count_key_format %_{prefix}-foo-bar
+		  store_list true
+          count_zset_key_format %_{host}-zset-key
+        </pattern>
+      ]
+      flunk
+    rescue Fluent::ConfigError => e
+      assert_equal 'store_list is true, it should be normal type, not hash or zset', e.message
+    end
+  end
+
   def test_configure_invalid_count_value
     begin
       create_driver %[
@@ -330,7 +361,6 @@ class RedisMultiTypeCounterTest < Test::Unit::TestCase
     assert_equal 2, driver.instance.redis.zscore("item_sum_count_by_zset:200", "US")
   end
 
-
   def test_write_with_count_value_key
     driver = create_driver %[
       db_number 1
@@ -369,4 +399,25 @@ class RedisMultiTypeCounterTest < Test::Unit::TestCase
     assert_equal '123', driver.instance.redis.get("item_sum_count:200"), "it should be ignore when count_value_key is not number"
   end
 
+  def test_write_with_store_list
+    driver = create_driver %[
+      db_number 1
+      <pattern>
+        count_key_format item_list_count:%_{item_id}
+        count_value_key count
+		store_list true
+      </pattern>
+    ]
+
+    time = Time.parse('2012-06-21 03:01:00 UTC').to_i
+    driver.emit({"item_id" => 200, "count" => 123}, time)
+    driver.emit({"item_id" => 200, "count" => 456}, time)
+    driver.emit({"item_id" => 200, "count" => 789}, time)
+    driver.run
+
+    assert_equal 3, driver.instance.redis.llen("item_list_count:200")
+	assert_equal '123', driver.instance.redis.lindex("item_list_count:200", 0)
+	assert_equal '456', driver.instance.redis.lindex("item_list_count:200", 1)
+	assert_equal '789', driver.instance.redis.lindex("item_list_count:200", 2)
+  end
 end

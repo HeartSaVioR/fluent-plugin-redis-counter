@@ -59,9 +59,18 @@ module Fluent
               count_key = pattern.get_count_key(time, record)
               count_hash_key = pattern.get_count_hash_key(record)
               count_zset_key = pattern.get_count_zset_key(record)
+              store_list = pattern.store_list
 
-              key = RecordKey.new(count_key, count_hash_key, count_zset_key)
-              table[key] += pattern.get_count_value(record)
+              key = RecordKey.new(count_key, count_hash_key, count_zset_key, store_list)
+			  if store_list
+			    if table[key] == 0
+				  table[key] = []
+				end
+
+			    table[key] << pattern.get_count_value(record)
+			  else
+                table[key] += pattern.get_count_value(record)
+		      end
             }
           }
         rescue EOFError
@@ -79,7 +88,11 @@ module Fluent
             elsif key.count_zset_key != nil
               @redis.zincrby(key.count_key, value, key.count_zset_key)
             else
-              @redis.incrby(key.count_key, value)
+			  if key.store_list
+			    @redis.rpush(key.count_key, value)
+              else
+                @redis.incrby(key.count_key, value)
+		      end
             end
           end
         end
@@ -87,12 +100,13 @@ module Fluent
     end
 
     class RecordKey
-      attr_reader :count_key, :count_hash_key, :count_zset_key
+      attr_reader :count_key, :count_hash_key, :count_zset_key, :store_list
 
-      def initialize(count_key, count_hash_key, count_zset_key)
+      def initialize(count_key, count_hash_key, count_zset_key, store_list)
         @count_key = count_key
         @count_hash_key = count_hash_key
         @count_zset_key = count_zset_key
+        @store_list = store_list
       end
 
       def hash
@@ -133,7 +147,7 @@ module Fluent
     end
 
     class Pattern
-      attr_reader :matches, :count_value, :count_value_key
+      attr_reader :matches, :count_value, :count_value_key, :store_list
 
       def initialize(conf_element)
         if !conf_element.has_key?('count_key') && !conf_element.has_key?('count_key_format')
@@ -155,6 +169,16 @@ module Fluent
           end
           @count_key_format = [conf_element['count_key_format'], is_localtime]
           @record_formatter_for_count_key = RecordValueFormatter.new(@count_key_format[0])
+        end
+
+        @store_list = false
+        if conf_element.has_key?('store_list') && conf_element['store_list'].downcase == 'true'
+          @store_list = true
+        end
+
+        if @store_list && (conf_element.has_key?('count_hash_key_format') ||
+            conf_element.has_key?('count_zset_key_format'))
+          raise RedisMultiTypeCounterException, 'store_list is true, it should be normal type, not hash or zset'
         end
 
         if conf_element.has_key?('count_hash_key_format') && conf_element.has_key?('count_zset_key_format')

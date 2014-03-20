@@ -51,6 +51,14 @@ fluent-plugin-redis-multi-type-counter is hosted by [RubyGems.org](https://rubyg
         count_key_format customer:%_{customer_id}:status2xx-%Y-%m-%d
       </pattern>
 
+      # you can just store value to list (not counting on, it's something awkward) by store_list to true
+      # note that you cannot use store_list with hash or zset
+      <pattern>
+        match_status ^2[0-9][0-9]$
+        count_key_format customer:%_{customer_id}:status2xx-%Y-%m-%d
+        store_list true
+      </pattern>
+
       # you can also sum up key in hash, by configuring count_hash_key_format
       # syntax is same to count_key_format
       # for example, {"custom_id": 123, "date": "20131219" ...}.

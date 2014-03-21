@@ -3,7 +3,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "fluent-plugin-redis-multi-type-counter"
-  s.version     = "0.1.2"
+  s.version     = "0.1.3"
   s.description = "fluent-plugin-redis-multi-type-counter is a fluent plugin to count-up/down redis keys, hash keys, zset keys"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Jungtaek Lim"]

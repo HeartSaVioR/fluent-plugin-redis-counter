@@ -1,3 +1,6 @@
+# 0.1.3
+* introduce store_list (no incr)
+
 ## 0.1.2
 * bug fix (rename files to fit plugin name)
 

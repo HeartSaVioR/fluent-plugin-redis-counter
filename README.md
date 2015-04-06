@@ -12,7 +12,7 @@ fluent-plugin-redis-multi-type-counter is hosted by [RubyGems.org](https://rubyg
 # Configuration
 
     <match redis_counter.**>
-      type redis_counter
+      type redis_multi_type_counter
 
       host localhost
       port 6379
@@ -94,7 +94,7 @@ prepare a conf file ("fluent.conf") in current directory like this:
       type forward
     </source>
     <match debug.**>
-      type redis_counter
+      type redis_multi_type_counter
       host localhost
       port 6379
       db_number 0
